@@ -6,7 +6,6 @@ build-backend = "setuptools.build_meta"
 name = "PySlyde"
 version = "0.1.0"
 dependencies = [
-    "huggingface_hub",
     "lmdb",
     "matplotlib",
     "numpy",
@@ -16,17 +15,7 @@ dependencies = [
     "scipy",
     "seaborn",
     "scikit-image",
-    "tensorflow",
-    "timm",
-    "torch",
-    "transformers",
-    "tf-keras",
     "scikit-learn",
-    "geopandas",
-    "rasterio",
-    "shapely",
-    "torchvision",
-    "pillow"
 ]
 requires-python = ">= 3.8"
 authors = [
@@ -66,7 +55,24 @@ docs = [
     "sphinx-autodoc-typehints>=1.12.0"
 ]
 rocksdb =  ["rocksdict>=0.3.24"]
-
+feature-extractor = [
+    "torch",
+    "pillow",
+    "timm",
+    "torchvision",
+    "huggingface_hub",
+    "transformers"
+]
+tensorflow = [
+    "tensorflow",
+    "tf-keras"
+]
+geospatial = [
+    "geopandas",
+    "rasterio",
+    "shapely"
+]
+all = ["pyslyde[rocksdb,feature-extractor,tensorflow,geospatial]"]
 
 [project.urls]
 Source = "https://github.com/PharosKCL/pyslyde"
