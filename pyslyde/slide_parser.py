@@ -13,7 +13,6 @@ import numpy as np
 import pandas as pd
 from openslide import OpenSlide
 
-from pyslyde.encoders.feature_extractor import FeatureGenerator
 from pyslyde.io.disk_io import DiskWrite
 from pyslyde.io.lmdb_io import LMDBWrite
 from pyslyde.normalization import StainNormalizer
@@ -632,6 +631,8 @@ class WSIParser:
                 "Providing `model_path` is not supported yet by FeatureGenerator."
             )
 
+        from pyslyde.encoders.feature_extractor import FeatureGenerator
+
         encode = FeatureGenerator(
             model_name=model_name, 
             force_hf_login=force_hf_login
@@ -1099,10 +1100,11 @@ class WSIParser:
         """
         try:
             from pyslyde.io.rocksdb_io import RocksDBWrite
-        except ImportError:
+        except ImportError as e:
             raise ImportError(
-                "RocksDB is not installed. Install it with: pip install pyslyde[rocksdb]"
-            )
+                "RocksDB support requires the 'rocksdb' optional "
+                "dependency group. Install it with: pip install pyslyde[rocksdb]"
+            ) from e
 
         os.makedirs(db_path, exist_ok=True)
         rocksdb_writer = RocksDBWrite(db_path, write_frequency)

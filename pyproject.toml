@@ -6,9 +6,6 @@ build-backend = "setuptools.build_meta"
 name = "PySlyde"
 version = "0.1.0"
 dependencies = [
-    "einops",
-    "h5py",
-    "huggingface_hub",
     "lmdb",
     "matplotlib",
     "numpy",
@@ -18,13 +15,7 @@ dependencies = [
     "scipy",
     "seaborn",
     "scikit-image",
-    "tensorflow",
-    "timm",
-    "torch",
-    "webdataset",
-    "transformers",
-    "tf-keras",
-    "gdown"
+    "scikit-learn",
 ]
 requires-python = ">= 3.8"
 authors = [
@@ -55,7 +46,7 @@ dev = [
     "ruff",
     "mypy",
     "pre-commit",
-    "scikit-learn"
+    "gdown"
 ]
 docs = [
     "sphinx>=4.0.0",
@@ -64,7 +55,24 @@ docs = [
     "sphinx-autodoc-typehints>=1.12.0"
 ]
 rocksdb =  ["rocksdict>=0.3.24"]
-
+feature-extractor = [
+    "torch",
+    "pillow",
+    "timm",
+    "torchvision",
+    "huggingface_hub",
+    "transformers"
+]
+tensorflow = [
+    "tensorflow",
+    "tf-keras"
+]
+geospatial = [
+    "geopandas",
+    "rasterio",
+    "shapely"
+]
+all = ["pyslyde[rocksdb,feature-extractor,tensorflow,geospatial]"]
 
 [project.urls]
 Source = "https://github.com/PharosKCL/pyslyde"
@@ -72,7 +80,7 @@ Documentation = "https://pyslyde.readthedocs.io/en/latest/"
 "Bug Reports" = "https://github.com/PharosKCL/pyslyde/issues"
 
 [tool.setuptools]
-packages = ["pyslyde"]
+packages = ["pyslyde", "pyslyde.encoders", "pyslyde.io", "pyslyde.masks", "pyslyde.normalization", "pyslyde.util"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
