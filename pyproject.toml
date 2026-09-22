@@ -25,7 +25,10 @@ dependencies = [
     "transformers",
     "tf-keras",
     "gdown",
-    "scikit-learn"
+    "scikit-learn",
+    "geopandas",
+    "rasterio",
+    "shapely"
 ]
 requires-python = ">= 3.8"
 authors = [
