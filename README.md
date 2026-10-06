@@ -61,80 +61,46 @@ pip install -e ".[docs]"
 
 ## Quick Start
 
-### Basic Usage
+The example below runs as-is: it downloads a small, openly licensed example slide
+(1.9 MB, [details](https://pyslyde.readthedocs.io/en/latest/example_data.html)) on first use.
+Replace the paths with your own slide and annotations. Feature extraction needs the optional
+deep-learning dependencies: `pip install "pyslyde[feature-extractor]"` (or `"pyslyde[all]"`).
 
 ```python
-from pyslyde import Slide, Annotations
-
-# Load a slide
-slide = Slide("path/to/your/slide.svs")
-
-# Load annotations
-annotations = Annotations("path/to/annotations.json", source="json")
-
-# Create slide with annotations
-slide_with_annotations = Slide(
-    "path/to/your/slide.svs",
-    annotations=annotations
-)
-
-# Generate mask
-mask = slide_with_annotations.generate_mask()
-
-# Extract a region
-region, region_mask = slide_with_annotations.generate_region(
-    x=(1000, 2000),
-    y=(1500, 2500),
-    x_size=1000,
-    y_size=1000
-)
-```
-
-### Tiling and Feature Extraction
-
-```python
-from pyslyde import WSIParser
-
-# Create parser
-parser = WSIParser(
-    slide=slide,
-    tile_dim=256,
-    border=slide.get_border(),
-    level=0
-)
-
-# Generate tiles
-num_tiles = parser.tiler(stride=128)
-
-# Extract features
-for coords, features in parser.extract_features(
-    model_name="resnet50",
-    model_path="path/to/model.pth"
-):
-    print(f"Tile {coords}: {features.shape}")
-
-# Save tiles to disk
-parser.save(
-    parser.extract_tiles(),
-    tile_path="output/tiles/"
-)
-```
-
-### Tissue Detection
-
-```python
+from pyslyde import Slide, WSIParser
+from pyslyde.datasets import example_data_dir
 from pyslyde.util.utilities import TissueDetect
 
-# Detect tissue regions
-detector = TissueDetect("path/to/slide.svs")
+data = example_data_dir()
+slide_path = str(data / "wsi" / "CMU-1-Small-Region.svs")
+
+# Slide + annotations (QuPath, ImageJ, ASAP, GeoJSON, CSV or custom JSON)
+slide = Slide(
+    slide_path,
+    annotations_path=str(data / "annotations" / "example.geojson"),
+    source="geojson",
+)
+mask = slide.generate_mask(size=(555, 742))            # annotation mask
+region, region_mask = slide.generate_region(level=0, x=(600, 1600), y=(1200, 2200))
+
+# Tissue detection
+detector = TissueDetect(slide_path)
 tissue_mask = detector.detect_tissue()
+border = detector.border()
 
-# Get tissue border
-border = detector.border(tissue_mask)
+# Tiling and feature extraction
+parser = WSIParser(slide=slide, tile_dim=256, border=slide.get_border(), level=0)
+parser.tiler(stride=256)
+parser.sample_tiles(n=8, seed=0)
+for (x, y), features in parser.extract_features(model_name="resnet18"):
+    print((x, y), features.shape)
 
-# Visualize tissue regions
-thumbnail = detector.tissue_thumbnail
+parser.save_tiles(tile_path="output/tiles")
+
 ```
+
+See the [Quick Start guide](https://pyslyde.readthedocs.io/en/latest/quickstart.html) and the
+[tutorial notebooks](docs/examples/) for the complete workflow.
 
 ## Documentation
 
@@ -144,10 +110,10 @@ The documentation includes:
 
 - **Installation Guide**: Detailed installation instructions and troubleshooting
 - **Quick Start Guide**: Get up and running quickly with basic examples
-- **User Guide**: Comprehensive guide to all features and workflows
-- **API Reference**: Complete API documentation with examples
-- **Examples**: Tutorials and example notebooks
-- **Contributing Guide**: How to contribute to the project
+- **Example data**: The openly licensed slide and synthetic annotations used throughout
+- **Tutorials**: Executable notebooks (also in [`docs/examples/`](docs/examples/))
+- **API Reference**: Generated from the docstrings, one page per module
+- **Running the tests / Contributing**: How to test and contribute
 
 ### Building Documentation Locally
 
@@ -163,12 +129,6 @@ make html
 
 # View documentation
 open _build/html/index.html
-```
-
-Or use the provided script:
-
-```bash
-python build_docs.py
 ```
 
 ## Contributing
@@ -187,8 +147,8 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 The project uses several development tools:
 
-- **Testing**: pytest for unit tests
-- **Code Quality**: black for formatting, flake8 for linting, mypy for type checking
+- **Testing**: pytest (unit tests, integration tests on the example dataset, executed docs snippets and notebooks; see [Running the tests](https://pyslyde.readthedocs.io/en/latest/testing.html))
+- **Code Quality**: ruff for linting and formatting, mypy for type checking
 - **Documentation**: Sphinx with Read the Docs theme
 - **Pre-commit**: Git hooks for code quality
 
@@ -200,7 +160,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Author**: Gregory Verghese
 - **Email**: gregory.e.verghese@kcl.ac.uk
-- **Project Link**: [https://github.com/PharosKCL/pyslyde)
+- **Project Link**: [https://github.com/PharosKCL/pyslyde](https://github.com/PharosKCL/pyslyde)
 - **Documentation**: [Documentation](https://pyslyde.readthedocs.io/en/latest/)
 ## Citation
 

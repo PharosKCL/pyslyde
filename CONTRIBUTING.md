@@ -7,144 +7,74 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 Clone the repository and install the necessary development extras.
 
 ```sh
-pip install -e ".[dev,docs]"
+pip install -e ".[all,dev,docs]"
 ```
 
 ### Testing
 
-To run the tests, use `pytest`.
-It can automatically find tests within the repo, or you can pass it the directory containing the tests.
+Run the test suite from the repository root:
 
 ```sh
-pytest test/
+pytest                          # unit + integration tests
 ```
 
-Some integration tests require additional resources (network access,
-large models, or external datasets) and are skipped by default unless
-explicitly configured.
+The tests are grouped with pytest markers:
 
-#### Feature extractor integration tests
+| Command | What runs | Needs |
+|---|---|---|
+| `pytest -m "not integration and not models"` | unit tests (mocked, fast) | nothing |
+| `pytest -m integration` | end-to-end tests on the example dataset: every annotation format, masks, regions, saving, and the documentation code snippets | network on the first run only (cached afterwards) |
+| `RUN_NETWORK_TESTS=1 pytest -m "models and not gated and not bigmem"` | real feature-extractor weights for the open models | network |
+| `RUN_NETWORK_TESTS=1 HUGGINGFACE_TOKEN=... pytest -m models` | all real-model tests, including gated (`gated`) and very large (`bigmem`) models | token, large machine |
+| `pytest --nbmake docs/examples/*.ipynb` | executes the tutorial notebooks | `pip install nbmake` |
 
-`test/test_feature_extractor_integration.py` contains opt-in integration
-tests that exercise real model loading and a forward pass for supported
-feature extractors. Some tests may download model weights from Hugging Face and/or require substantial memory, so they are skipped by default unless enabled explicitly.
+With the example dataset available, `pytest -m integration` should report
+**0 skipped** tests.
 
-Enable these tests with network access by setting:
+#### Integration data
 
-``` sh
-RUN_NETWORK_TESTS=1 pytest test/test_feature_extractor_integration.py
+The integration tests use the PySlyde example dataset (`pyslyde.datasets`):
+
+- the CC0-licensed OpenSlide slide `CMU-1-Small-Region.svs`, downloaded once,
+  checked against a pinned SHA-256 and cached in `~/.cache/pyslyde`
+  (`PYSLYDE_CACHE_DIR` overrides the location);
+- synthetic annotations in all six formats, shipped in
+  `pyslyde/datasets/annotations` and regenerated with
+  `python scripts/make_example_annotations.py`.
+
+You do not need to configure anything. To test other data, use a directory
+or archive laid out as `wsi/` + `annotations/`:
+
+```sh
+PYSLYDE_IT_DATA_DIR=/path/to/data pytest -m integration
+PYSLYDE_IT_DATA_URL=<archive_url> PYSLYDE_IT_DATA_SHA256=<sha256> pytest -m integration
 ```
 
-##### Gated Hugging Face models
+A checksum is required for remote archives. If the data cannot be obtained
+(e.g. offline on the first run), the integration tests are skipped with the
+reason. Set `PYSLYDE_IT_STRICT=1` to make them fail instead; CI runs in strict
+mode.
 
-Some models are gated on Hugging Face. If the weights are not already
-present in your local cache, you must provide a Hugging Face token:
+#### Feature-extractor (real model) tests
 
-``` sh
-RUN_NETWORK_TESTS=1 HUGGINGFACE_TOKEN=<your_token> pytest test/test_feature_extractor_integration.py
+Gated Hugging Face models need `HUGGINGFACE_TOKEN` unless the weights are
+already in the local cache. Very large models are skipped unless enough memory
+is available; adjust the thresholds with `MIN_CPU_AVAIL_GB` and
+`MIN_FREE_VRAM_GB` (default 24 GB).
+
+### Documentation
+
+The documentation (Sphinx, in `docs/`) is built with warnings as errors in CI
+and on Read the Docs:
+
+```sh
+pip install -r docs/requirements.txt
+sphinx-build -W --keep-going -b html docs docs/_build/html
 ```
 
-If a gated model is already cached locally, the integration tests are
-designed to load it without requiring `HUGGINGFACE_TOKEN`.
-
-##### Memory thresholds (OOM avoidance)
-
-Large foundation models can trigger OS-level out-of-memory (OOM) kills
-during loading or inference. To improve reliability, the integration
-tests perform dynamic checks for available CPU RAM and (when CUDA is
-available) free GPU VRAM, and will skip tests when resources are
-insufficient.
-
-You may override the default resource thresholds:
-
-``` sh
-RUN_NETWORK_TESTS=1 MIN_CPU_AVAIL_GB=24 MIN_FREE_VRAM_GB=24 pytest test/test_feature_extractor_integration.py
-```
-
-**Notes:**
-
--   `MIN_FREE_VRAM_GB` applies only when CUDA is available.
--   These environment variables apply only to
-    `test/test_feature_extractor_integration.py`.
-
-#### Slide integration tests
-
-`test/test_slide_integration.py` contains opt-in integration tests for
-the slide processing pipeline, including whole-slide image
-loading, annotation parsing, mask generation, region extraction, and
-artifact saving.
-
-These tests require external fixture data (whole-slide images and
-annotation files) and will be skipped unless integration data is
-configured.
-
-##### Required fixture structure
-
-The integration data directory must have the following structure:
-
-    PARENT/
-    ├── annotations/
-    │   ├── asap.xml
-    │   ├── name.csv
-    │   ├── geojson.json or .geojson
-    │   ├── imagej.xml
-    │   └── qupath.json
-    └── wsi/
-        └── wsi.ndpi
-
-**Notes:**
-
--   The `annotations` directory may contain additional files.
--   Tests select the first matching file for each supported format.
--   Supported whole-slide image formats include `.svs`, `.ndpi`, `.tif`,
-    `.tiff`, `.ome.tif`, and `.ome.tiff`.
-
-##### Providing integration data
-
-The fixture root is resolved in the following order of precedence (highest to lowest):
-
-1.  **Local directory or archive**
-
-``` sh
-PYSLYDE_IT_DATA_DIR=/path/to/PARENT pytest test/test_slide_integration.py
-```
-
-You may also provide a compressed archive:
-
-``` sh
-PYSLYDE_IT_DATA_DIR=/path/to/fixtures.zip pytest test/test_slide_integration.py
-```
-
-2.  **Remote archive URL**
-
-``` sh
-PYSLYDE_IT_DATA_URL=<archive_url> pytest test/test_slide_integration.py
-```
-
-Optional integrity verification:
-
-``` sh
-PYSLYDE_IT_DATA_URL=<archive_url> PYSLYDE_IT_DATA_SHA256=<sha256> pytest test/test_slide_integration.py
-```
-
-3. **Default remote archive**
-If neither is provided, tests will default to `DEFAULT_DATA_URL` set in `conftest.py` 
-
-4. If neither is set, the tests skip automatically with explanations.
-
-##### Temporary directory
-
-You may optionally specify a temporary directory for writing outputs:
-
-``` sh
-pytest test/test_slide_integration.py --basetemp=<temp_dir>
-```
-
-**Notes:**
-
-- Supported compressed archive formats include `.zip`, `.tar`, `.tar.gz`, and `.tgz`.
-- Google Drive URLs are supported. The test suite automatically uses the
-  `gdown` dependency to handle downloads.
+The tutorial notebooks in `docs/examples/` are rendered with their stored
+outputs. After changing one, re-execute it top to bottom before committing,
+e.g. with `jupyter execute --inplace docs/examples/<name>.ipynb`.
 
 ### Linting and formatting
 

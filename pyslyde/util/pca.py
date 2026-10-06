@@ -228,7 +228,7 @@ def _iter_feature_arrays_from_disk(
     """
     Yield feature arrays from .npy files on disk.
 
-    If `pattern` is None, defaults to "*.npy".
+    If `pattern` is None, defaults to ``"*.npy"``.
     """
     file_paths = _discover_feature_files(
         root=root,
@@ -478,7 +478,7 @@ def fit_pca(
 
             Behavior by source:
                 - disk:
-                    pattern matches feature files; defaults to "*.npy" if omitted
+                    pattern matches feature files; defaults to ``"*.npy"`` if omitted
                 - lmdb:
                     pattern matches LMDB database directory names
                 - rocksdb:

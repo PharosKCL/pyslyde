@@ -1,235 +1,192 @@
-Quick Start Guide
-================
+Quick Start
+===========
 
-This guide will help you get started with PySlyde quickly. We'll cover the basic usage patterns and common workflows.
+This page walks through a complete PySlyde workflow on the
+:doc:`example dataset <example_data>`: a small, openly licensed slide plus
+annotations in every supported format. All code blocks on this page run in
+order, as written, in a fresh Python session (they are executed by the test
+suite, see :doc:`testing`).
 
-Basic Usage
-----------
+Get the example data
+--------------------
 
-Loading a Slide
-^^^^^^^^^^^^^^
+.. code-block:: python
 
-The core of PySlyde is the `Slide` class, which wraps OpenSlide functionality:
+   from pyslyde.datasets import example_data_dir
+
+   data = example_data_dir()   # downloads the slide once (1.9 MB), then uses the cache
+   slide_path = str(data / "wsi" / "CMU-1-Small-Region.svs")
+   annotation_path = str(data / "annotations" / "example.geojson")
+
+To use your own data, replace ``slide_path`` and ``annotation_path`` with the
+paths to your files.
+
+Load a slide
+------------
+
+:class:`~pyslyde.slide.Slide` is a subclass of :class:`openslide.OpenSlide`,
+so every OpenSlide attribute is available as well:
 
 .. code-block:: python
 
    from pyslyde import Slide
 
-   # Load a whole slide image
-   slide = Slide("path/to/your/slide.svs")
-   
-   # Access basic properties
-   print(f"Slide dimensions: {slide.dims}")
-   print(f"Slide name: {slide.name}")
-   print(f"Number of levels: {slide.level_count}")
+   slide = Slide(slide_path)
+   print(slide.name)               # CMU-1-Small-Region.svs
+   print(slide.dims)               # (2220, 2967) - level-0 (width, height)
+   print(slide.level_count)        # 1
+   print(slide.level_dimensions)   # ((2220, 2967),)
 
-Working with Annotations
-^^^^^^^^^^^^^^^^^^^^^^^
+Load annotations
+----------------
 
-PySlyde supports multiple annotation formats:
+:class:`~pyslyde.slide.Annotations` reads six formats, selected with
+``source``. The example dataset provides the same polygons in each of them:
 
 .. code-block:: python
 
    from pyslyde import Annotations
 
-   # Load annotations from different sources
-   qupath_annotations = Annotations("path/to/qupath.json", source="qupath")
-   imagej_annotations = Annotations("path/to/imagej.xml", source="imagej")
-   asap_annotations = Annotations("path/to/asap.xml", source="asap")
-   json_annotations = Annotations("path/to/annotations.json", source="json")
-   csv_annotations = Annotations("path/to/annotations.csv", source="csv")
+   ann_dir = data / "annotations"
+   annotations = Annotations(annotation_path, source="geojson")
+   csv_ann = Annotations(str(ann_dir / "example.csv"), source="csv")
+   qupath_ann = Annotations(str(ann_dir / "example_qupath.json"), source="qupath")
+   asap_ann = Annotations(str(ann_dir / "example_asap.xml"), source="asap")
+   imagej_ann = Annotations(str(ann_dir / "example_imagej.xml"), source="imagej")
+   json_ann = Annotations(str(ann_dir / "example_custom.json"), source="json")
 
-   # Create slide with annotations
-   slide_with_annotations = Slide(
-       "path/to/slide.svs",
-       annotations=qupath_annotations
-   )
+   print(annotations.class_key)    # {'epithelium': 1, 'tissue': 2}
 
-Generating Masks
-^^^^^^^^^^^^^^^
-
-Create masks from annotations:
+Attach the annotations to the slide (alternatively pass
+``annotations_path=...`` and ``source=...`` directly to ``Slide``):
 
 .. code-block:: python
 
-   # Generate a mask with default size (2000x2000)
-   mask = slide_with_annotations.generate_mask()
-   
-   # Generate a mask with custom size
-   mask = slide_with_annotations.generate_mask(size=(1000, 1000))
-   
-   # Generate a mask for specific labels
-   mask = slide_with_annotations.generate_mask(labels=["tumor", "stroma"])
+   slide = Slide(slide_path, annotations=annotations)
 
-Extracting Regions
-^^^^^^^^^^^^^^^^^
+Generate masks
+--------------
 
-Extract specific regions from the slide:
+:meth:`~pyslyde.slide.Slide.generate_mask` rasterises the annotations into an
+integer mask (0 = background, otherwise the class ID from ``class_key``).
+Give either an output ``size`` (width, height) or a pyramid ``level``:
 
 .. code-block:: python
 
-   # Extract a region with specified coordinates and size
-   region, region_mask = slide_with_annotations.generate_region(
-       x=(1000, 2000),  # x range
-       y=(1500, 2500),  # y range
-       x_size=1000,     # width
-       y_size=1000      # height
-   )
+   mask = slide.generate_mask(size=(555, 742))                 # downsampled mask
+   epithelium = slide.generate_mask(size=(555, 742), labels=["epithelium"])
+   mask_level0 = slide.generate_mask(level=0)                   # full resolution
 
-Tiling and Feature Extraction
-----------------------------
+   print(mask.shape)          # (742, 555) - (height, width)
+   print(mask_level0.shape)   # (2967, 2220)
 
-Creating Tiles
-^^^^^^^^^^^^^
+Calling ``generate_mask()`` without ``size`` or ``level`` raises an error
+unless ``full_res=True``, to avoid accidentally allocating a gigapixel array.
 
-Use the `WSIParser` for advanced tiling operations:
+Extract regions
+---------------
+
+:meth:`~pyslyde.slide.Slide.generate_region` returns an RGB region and the
+matching annotation mask. Coordinates are level-0 pixels; give either
+``(start, end)`` ranges or a start point plus ``x_size`` / ``y_size``:
+
+.. code-block:: python
+
+   region, region_mask = slide.generate_region(level=0, x=(600, 1600), y=(1200, 2200))
+   print(region.shape, region_mask.shape)   # (1000, 1000, 3) (1000, 1000)
+
+   patch, patch_mask = slide.generate_region(level=0, x=600, y=1200, x_size=512, y_size=512)
+   print(patch.shape)                       # (512, 512, 3)
+
+Save the mask, a visualisation and the metadata in one call:
+
+.. code-block:: python
+
+   outputs = slide.save("quickstart_output/slide", size=(555, 742), overwrite=True)
+   print(sorted(outputs))   # ['mask', 'meta', 'vis']
+
+Detect tissue
+-------------
+
+:class:`~pyslyde.util.utilities.TissueDetect` finds tissue without any
+annotations:
+
+.. code-block:: python
+
+   from pyslyde.util.utilities import TissueDetect
+
+   detector = TissueDetect(slide_path)
+   tissue_mask = detector.detect_tissue()   # full-resolution binary mask
+   border = detector.border()               # ((x_min, x_max), (y_min, y_max))
+   thumbnail = detector.tissue_thumbnail    # RGB image for display
+
+   print(tissue_mask.shape, border)
+
+Tile the slide
+--------------
+
+:class:`~pyslyde.slide_parser.WSIParser` tiles a slide inside a border, here
+the bounding box of the annotations:
 
 .. code-block:: python
 
    from pyslyde import WSIParser
 
-   # Create a parser
    parser = WSIParser(
-       slide=slide_with_annotations,
-       tile_dim=256,  # tile size
-       border=slide_with_annotations.get_border(),
-       level=0        # pyramid level
+       slide=slide,
+       tile_dim=256,                # tile size in pixels
+       border=slide.get_border(),   # [(x_min, x_max), (y_min, y_max)]
+       level=0,                     # pyramid level to read tiles from
    )
+   n_tiles = parser.tiler(stride=256)
+   print(f"Generated {n_tiles} tiles")
 
-   # Generate tiles
-   num_tiles = parser.tiler(stride=128)
-   print(f"Generated {num_tiles} tiles")
-
-Extracting Features
-^^^^^^^^^^^^^^^^^^
-
-Extract features from tiles using pre-trained models:
+Filter tiles with any function that takes a tile and returns ``True`` for
+tiles to drop. :func:`pyslyde.util.filters.tile_intensity` drops bright,
+mostly-background tiles:
 
 .. code-block:: python
 
-   # Extract features from all tiles
-   for coords, features in parser.extract_features(
-       model_name="resnet50",
-       model_path="path/to/model.pth"
-   ):
-       print(f"Tile {coords}: {features.shape}")
+   from pyslyde.util import filters
 
-Saving Results
-^^^^^^^^^^^^^
+   parser.filter_by_func(filters.tile_intensity, threshold=220)
+   print(f"{parser.number} tiles left after filtering")
 
-Save tiles and features in different formats:
+   parser.sample_tiles(n=8, seed=0)     # keep a small random subset for this example
 
-.. code-block:: python
+Extract features
+----------------
 
-   # Save tiles to disk
-   parser.save(
-       parser.extract_tiles(),
-       tile_path="output/tiles/",
-       label_dir=True,
-       label_csv=True
-   )
-
-   # Save to LMDB database
-   parser.to_lmdb(
-       parser.extract_tiles(),
-       db_path="output/tiles.lmdb",
-       map_size=1024*1024*1024  # 1GB
-   )
-
-Tissue Detection
----------------
-
-Automatic tissue detection:
+:meth:`~pyslyde.slide_parser.WSIParser.extract_features` yields
+``((x, y), feature_vector)`` for each tile. It needs the deep-learning
+dependencies (``pip install "pyslyde[feature-extractor]"``, see
+:doc:`installation`). Torchvision models such as ``resnet18`` and
+``resnet50`` download their ImageNet weights on first use. Gated pathology
+foundation models (UNI, Virchow, ...) also need a Hugging Face token.
 
 .. code-block:: python
 
-   from pyslyde.util.utilities import TissueDetect
+   for (x, y), features in parser.extract_features(model_name="resnet18"):
+       print((x, y), features.shape)   # e.g. (1536, 2816) (512,)
 
-   # Detect tissue regions
-   detector = TissueDetect("path/to/slide.svs")
-   tissue_mask = detector.detect_tissue()
-   
-   # Get tissue border
-   border = detector.border(tissue_mask)
-   
-   # Visualize tissue regions
-   thumbnail = detector.tissue_thumbnail
-
-Image Filtering
---------------
-
-Apply filters to remove unwanted regions:
-
-.. code-block:: python
-
-   from pyslyde import filters
-
-   # Remove black patches
-   filtered_patches = filters.remove_black(
-       patches,
-       threshold=60,
-       area_thresh=0.2
-   )
-
-   # Remove blue patches (staining artifacts)
-   filtered_patches = filters.remove_blue(
-       patches,
-       area_thresh=0.2
-   )
-
-Complete Example
----------------
-
-Here's a complete example that demonstrates a typical workflow:
-
-.. code-block:: python
-
-   from pyslyde import Slide, Annotations, WSIParser
-   from pyslyde.util.utilities import TissueDetect
-
-   # 1. Load slide and annotations
-   slide = Slide("path/to/slide.svs")
-   annotations = Annotations("path/to/annotations.json", source="json")
-   slide_with_annotations = Slide("path/to/slide.svs", annotations=annotations)
-
-   # 2. Detect tissue regions
-   detector = TissueDetect("path/to/slide.svs")
-   tissue_mask = detector.detect_tissue()
-   border = detector.border(tissue_mask)
-
-   # 3. Create parser for tiling
-   parser = WSIParser(
-       slide=slide_with_annotations,
-       tile_dim=256,
-       border=border,
-       level=0
-   )
-
-   # 4. Generate tiles
-   num_tiles = parser.tiler(stride=128)
-   print(f"Generated {num_tiles} tiles")
-
-   # 5. Extract features
-   for coords, features in parser.extract_features(
-       model_name="resnet50",
-       model_path="path/to/model.pth"
-   ):
-       print(f"Processed tile {coords}")
-
-   # 6. Save results
-   parser.save(
-       parser.extract_tiles(),
-       tile_path="output/tiles/",
-       label_dir=True
-   )
-
-Next Steps
+Save tiles
 ----------
 
-Now that you have the basics, you can explore:
+.. code-block:: python
 
-* :doc:`user_guide/index` - Detailed user guide
-* :doc:`api/index` - Complete API reference
-* :doc:`examples/index` - More examples and tutorials
+   # PNG files on disk
+   parser.save_tiles(tile_path="quickstart_output/tiles")
 
-For more advanced usage patterns and best practices, see the :doc:`user_guide/index`. 
+   # or an LMDB database
+   parser.to_lmdb(
+       parser.extract_tiles(),
+       db_path="quickstart_output/tiles.lmdb",
+       map_size=1024**3,   # 1 GB
+   )
+
+Next steps
+----------
+
+* :doc:`examples/index` - end-to-end tutorial notebooks
+* :doc:`api/index` - full API reference
+* :doc:`example_data` - what the example dataset contains and how it is built
