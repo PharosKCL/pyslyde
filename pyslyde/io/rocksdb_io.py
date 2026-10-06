@@ -11,8 +11,8 @@ try:
     from rocksdict import Options, Rdict
 except ImportError as e:
     raise ImportError(
-        "RocksDB support requires the optional dependency 'rocksdict'. "
-        "Install it with: pip install 'PySlyde[rocksdb]'"
+        "RocksDB support requires the 'rocksdb' optional "
+        "dependency group. Install it with: pip install pyslyde[rocksdb]"
     ) from e
 
 
