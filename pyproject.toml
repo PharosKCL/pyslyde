@@ -79,8 +79,8 @@ Source = "https://github.com/PharosKCL/pyslyde"
 Documentation = "https://pyslyde.readthedocs.io/en/latest/"
 "Bug Reports" = "https://github.com/PharosKCL/pyslyde/issues"
 
-[tool.setuptools]
-packages = ["pyslyde", "pyslyde.encoders", "pyslyde.io", "pyslyde.masks", "pyslyde.normalization", "pyslyde.util"]
+[tool.setuptools.packages.find]
+include = ["pyslyde*"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
