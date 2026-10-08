@@ -12,55 +12,24 @@ pip install -e ".[all,dev,docs]"
 
 ### Testing
 
-Run the test suite from the repository root:
+Run the tests from the repository root. The three most common cases are:
 
 ```sh
-pytest                          # unit + integration tests
+# 1. Fast: unit tests only (mocked, no network)
+pytest -m "not integration and not models"
+
+# 2. Everything that needs no special set-up or access: unit, integration
+#    and open-model tests (network needed on the first run)
+RUN_NETWORK_TESTS=1 pytest -m "not gated and not bigmem"
+
+# 3. Everything: also gated and very large models, plus the tutorial notebooks
+RUN_NETWORK_TESTS=1 HUGGINGFACE_TOKEN=<token> pytest
+pytest --nbmake docs/examples/*.ipynb
 ```
 
-The tests are grouped with pytest markers:
-
-| Command | What runs | Needs |
-|---|---|---|
-| `pytest -m "not integration and not models"` | unit tests (mocked, fast) | nothing |
-| `pytest -m integration` | end-to-end tests on the example dataset: every annotation format, masks, regions, saving, and the documentation code snippets | network on the first run only (cached afterwards) |
-| `RUN_NETWORK_TESTS=1 pytest -m "models and not gated and not bigmem"` | real feature-extractor weights for the open models | network |
-| `RUN_NETWORK_TESTS=1 HUGGINGFACE_TOKEN=... pytest -m models` | all real-model tests, including gated (`gated`) and very large (`bigmem`) models | token, large machine |
-| `pytest --nbmake docs/examples/*.ipynb` | executes the tutorial notebooks | `pip install nbmake` |
-
-With the example dataset available, `pytest -m integration` should report
-**0 skipped** tests.
-
-#### Integration data
-
-The integration tests use the PySlyde example dataset (`pyslyde.datasets`):
-
-- the CC0-licensed OpenSlide slide `CMU-1-Small-Region.svs`, downloaded once,
-  checked against a pinned SHA-256 and cached in `~/.cache/pyslyde`
-  (`PYSLYDE_CACHE_DIR` overrides the location);
-- synthetic annotations in all six formats, shipped in
-  `pyslyde/datasets/annotations` and regenerated with
-  `python scripts/make_example_annotations.py`.
-
-You do not need to configure anything. To test other data, use a directory
-or archive laid out as `wsi/` + `annotations/`:
-
-```sh
-PYSLYDE_IT_DATA_DIR=/path/to/data pytest -m integration
-PYSLYDE_IT_DATA_URL=<archive_url> PYSLYDE_IT_DATA_SHA256=<sha256> pytest -m integration
-```
-
-A checksum is required for remote archives. If the data cannot be obtained
-(e.g. offline on the first run), the integration tests are skipped with the
-reason. Set `PYSLYDE_IT_STRICT=1` to make them fail instead; CI runs in strict
-mode.
-
-#### Feature-extractor (real model) tests
-
-Gated Hugging Face models need `HUGGINGFACE_TOKEN` unless the weights are
-already in the local cache. Very large models are skipped unless enough memory
-is available; adjust the thresholds with `MIN_CPU_AVAIL_GB` and
-`MIN_FREE_VRAM_GB` (default 24 GB).
+See [Running the tests](https://pyslyde.readthedocs.io/en/latest/testing.html) for what each marker
+(`integration`, `models`, `gated`, `bigmem`) covers, the environment variables
+that control them, and how to run the integration tests on your own data.
 
 ### Documentation
 

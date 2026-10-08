@@ -46,6 +46,7 @@ dev = [
     "ruff",
     "mypy",
     "pre-commit",
+    "nbmake",
 ]
 docs = [
     "sphinx>=7.2",
