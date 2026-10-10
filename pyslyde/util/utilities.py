@@ -424,7 +424,7 @@ class TissueDetect:
 
     def border(
         self, mask: Optional[np.ndarray] = None
-    ) -> Optional[Tuple[Tuple[int, int], Tuple[int, int]]]:
+    ) -> Tuple[Tuple[int, int], Tuple[int, int]]:
         """
         Get border coordinates from a tissue/contour mask.
 
@@ -433,22 +433,31 @@ class TissueDetect:
                 Optional mask to use instead of `self.contour_mask`.
 
         Returns:
-            Optional[Tuple[Tuple[int, int], Tuple[int, int]]]:
-                Border coordinates as:
-                    ((x_min, x_max), (y_min, y_max))
+            Tuple[Tuple[int, int], Tuple[int, int]]:
+                Border coordinates ``((x_min, x_max), (y_min, y_max))``,
                 where x_max / y_max are exclusive ends.
 
         Notes:
-            If the provided mask is not already full-resolution, it is resized
-            to the full dimensions of the active backend before contour
-            extraction so that returned coordinates are in full image space.
-        """
-        if mask is None and self.contour_mask is None:
-            return None
+            Mask selection when ``mask`` is not given, in order:
 
-        mask = self.contour_mask if mask is None else mask
+            1. ``self.contour_mask`` (set by ``_generate_tissue_contour()``),
+            2. ``self.tissue_mask`` (set by ``detect_tissue()``),
+            3. otherwise ``detect_tissue()`` is run first.
+
+            So ``TissueDetect(path).border()`` and
+            ``td.detect_tissue(); td.border()`` both work.
+
+            If the mask is not already full-resolution, it is resized to the
+            full dimensions of the active backend before contour extraction so
+            that returned coordinates are in full image space.
+        """
         if mask is None:
-            return None
+            if self.contour_mask is not None:
+                mask = self.contour_mask
+            else:
+                if self.tissue_mask is None:
+                    self.detect_tissue()
+                mask = self.tissue_mask
 
         width, height = self._get_full_dimensions()
 
@@ -691,16 +700,18 @@ def get_size(slide, size_from, level_from, level_to, rounding="round"):
     """
     Given a size (size_from) at a certain level (level_from), this function will return
     a new size (size_to) but at a different level (level_to).
+
     Args:
-        slide : Openslide object from which we extract.
-        size_from : A tuple, or tuple like object of size 2 with integers.
-        level_from : Integer, initial level.
-        level_to : Integer, final level.
-        integer : One of {"round", "floor", "ceil", None}.
-                  If None, return floating-point dimensions unchanged.
-        Returns:
-            A tuple, or tuple like object of size 2 with integers corresponding
-            to the new size at level level_to. Or size_to.
+        slide: OpenSlide object from which we extract.
+        size_from: A tuple, or tuple-like object of size 2 with integers.
+        level_from: Integer, initial level.
+        level_to: Integer, final level.
+        rounding: One of {"round", "floor", "ceil", None}.
+            If None, return floating-point dimensions unchanged.
+
+    Returns:
+        A tuple, or tuple-like object of size 2 with integers corresponding
+        to the new size at level level_to.
     """
     size_x, size_y = size_from
     downsamples = slide.level_downsamples
