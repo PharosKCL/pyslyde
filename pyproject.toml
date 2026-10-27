@@ -19,6 +19,21 @@ dependencies = [
 ]
 requires-python = ">= 3.8"
 authors = [
+    {name = "Chima Eke"},
+    {name = "Anthony Baptista"},
+    {name = "Holly Rafique"},
+    {name = "Elizabeth Ing-Simmons"},
+    {name = "Enrico Parisini"},
+    {name = "Mengyuan Li"},
+    {name = "Fathima Mohamed"},
+    {name = "Ananya Bhalla"},
+    {name = "Lucy Ryan"},
+    {name = "Michael Pitcher"},
+    {name = "Concetta Piazzese"},
+    {name = "James Graham"},
+    {name = "Dinis Pedro Calado"},
+    {name = "Christopher R.S. Banerji"},
+    {name = "Anita Grigoriadis"},
     {name = "Gregory Verghese", email = "gregory.verghese@gmail.com"}
     ]
 description = "A Python package for preprocessing pathology whole slide images."
