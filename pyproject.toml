@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PySlyde"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
     "lmdb",
     "matplotlib",
@@ -14,10 +14,10 @@ dependencies = [
     "pandas",
     "scipy",
     "seaborn",
-    "scikit-image",
+    "scikit-image>=0.25",
     "scikit-learn",
 ]
-requires-python = ">= 3.8"
+requires-python = ">= 3.10"
 authors = [
     {name = "Chima Eke"},
     {name = "Anthony Baptista"},
@@ -45,8 +45,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",

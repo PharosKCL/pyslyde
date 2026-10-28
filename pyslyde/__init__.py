@@ -3,7 +3,7 @@
 from pyslyde.slide import Slide, Annotations
 from pyslyde.slide_parser import WSIParser, Stitching
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __author__ = (
     "Chima Eke, Anthony Baptista, Holly Rafique, Elizabeth Ing-Simmons, "
     "Enrico Parisini, Mengyuan Li, Fathima Mohamed, Ananya Bhalla, Lucy Ryan, "

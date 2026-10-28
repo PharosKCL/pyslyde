@@ -124,8 +124,8 @@ jobs:
     - name: Install the code linting and formatting tool Ruff
       run: pipx install ruff
     - name: Lint code with Ruff
-      run: ruff check --output-format=github --target-version=py39
+      run: ruff check --output-format=github --target-version=py310
       continue-on-error: true
     - name: Check code formatting with Ruff
-      run: ruff format --diff --target-version=py39
+      run: ruff format --diff --target-version=py310
       continue-on-error: true
