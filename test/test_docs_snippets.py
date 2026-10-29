@@ -49,7 +49,8 @@ def test_doc_code_blocks_run(page, integration_data_dir, tmp_path, monkeypatch):
     namespace: dict = {"__name__": "__docs__"}
     for i, block in enumerate(_python_blocks(REPO / page), start=1):
         try:
-            exec(compile(block, f"{page}[block {i}]", "exec"), namespace)
+            # Running the documentation's own code blocks is the point of this test.
+            exec(compile(block, f"{page}[block {i}]", "exec"), namespace)  # noqa: S102
         except Exception as e:  # pragma: no cover - failure path
             pytest.fail(
                 f"{page}: code block {i} failed with {type(e).__name__}: {e}\n\n{block}",
