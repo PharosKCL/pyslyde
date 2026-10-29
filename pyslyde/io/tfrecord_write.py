@@ -99,7 +99,6 @@ def convert(imageFiles, maskFiles, tfRecordPath, dim=None):
         for i, (img, m) in enumerate(zip(imageFiles, maskFiles)):
             printProgress(i, numImgs)
             imgName = os.path.basename(img)[:-4]
-            maskName = os.path.basename(m)[:-10]
             mPath = os.path.dirname(m)
 
             m = os.path.join(mPath, os.path.basename(img[:-4]) + "_masks.png")
@@ -107,8 +106,6 @@ def convert(imageFiles, maskFiles, tfRecordPath, dim=None):
             if not os.path.exists(m):
                 check.append(maskName)
                 continue
-
-            maskName = os.path.basename(m)
 
             image = tf.keras.preprocessing.image.load_img(img)
             image = tf.keras.preprocessing.image.img_to_array(image, dtype=np.uint8)
@@ -123,7 +120,7 @@ def convert(imageFiles, maskFiles, tfRecordPath, dim=None):
             data = {
                 "image": wrapBytes(image),
                 "mask": wrapBytes(mask),
-                "imageName": wrapBytes(os.path.basename(img)[:-4].encode("utf-8")),
+                "imageName": wrapBytes(imgName.encode("utf-8")),
                 "maskName": wrapBytes(os.path.basename(m)[:-4].encode("utf-8")),
                 "dims": wrapInt64(dims[0]),
             }
