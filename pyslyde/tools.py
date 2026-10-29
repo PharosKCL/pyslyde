@@ -41,7 +41,6 @@ def polygons_from_mask(mask):
         import rasterio
         from rasterio.features import rasterize, shapes
         from shapely.geometry import Polygon, shape
-        from shapely.validation import make_valid
     except ImportError as e:
         raise ImportError(
             "Geospatial tools require the 'geospatial' optional "

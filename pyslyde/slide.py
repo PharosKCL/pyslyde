@@ -749,7 +749,6 @@ class Slide(OpenSlide):
                 size = v_max - v_min
                 return v_min, v_max, size
             else:
-                v_min = v_min
                 v_max = v_min + size
                 return v_min, v_max, size
 

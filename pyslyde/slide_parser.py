@@ -631,7 +631,6 @@ class WSIParser:
 
         encode = FeatureGenerator(model_name=model_name, force_hf_login=force_hf_login)
 
-        count = 0
         for x, y in self._tiles:
             tile = self.extract_tile(
                 x=x,
@@ -643,7 +642,6 @@ class WSIParser:
             )
             feature_vec = encode.forward_pass(tile)
             feature_vec = feature_vec.detach().cpu().numpy()
-            count += 1
             yield (x, y), feature_vec
 
     def filter_by_mask(
