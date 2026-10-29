@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Regenerate the synthetic example annotations shipped with PySlyde.
 
