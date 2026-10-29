@@ -217,7 +217,7 @@ def test_draw_boundary_output():
 ### ---------- TEST: get_x_y_from_0 ----------
 def test_get_x_y_from_0_scaling():
     class MockSlide:
-        level_dimensions = [(1000, 1000), (500, 500)]
+        level_dimensions = ((1000, 1000), (500, 500))
 
     point = (250, 250)
     level = 1
@@ -228,7 +228,7 @@ def test_get_x_y_from_0_scaling():
 ### ---------- TEST: get_size ----------
 def test_get_size_scaling():
     class MockSlide:
-        level_downsamples = [1.0, 4.0]
+        level_downsamples = (1.0, 4.0)
 
     size = (400, 400)
     new_size = utilities.get_size(MockSlide(), size, 0, 1)

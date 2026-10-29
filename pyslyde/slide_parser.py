@@ -1200,8 +1200,8 @@ class Stitching:
       for primary placement.
     """
 
-    VALID_POLICIES = {"overwrite", "max"}
-    VALID_CONTENT_TYPES = {"image", "mask"}
+    VALID_POLICIES = frozenset({"overwrite", "max"})
+    VALID_CONTENT_TYPES = frozenset({"image", "mask"})
 
     def __init__(
         self,

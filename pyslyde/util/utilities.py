@@ -9,7 +9,7 @@ import os
 import random
 from itertools import chain
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 import cv2
 import matplotlib as mpl
@@ -197,14 +197,14 @@ class TissueDetect:
     where x_max / y_max are exclusive ends.
     """
 
-    bilateral_args = [
+    bilateral_args: ClassVar[list[dict[str, Any]]] = [
         {"d": 90, "sigmaColor": 5000, "sigmaSpace": 5000},
         {"d": 90, "sigmaColor": 5000, "sigmaSpace": 5000},
         {"d": 90, "sigmaColor": 10000, "sigmaSpace": 10000},
         {"d": 90, "sigmaColor": 10000, "sigmaSpace": 100},
     ]
 
-    thresh_args = [
+    thresh_args: ClassVar[list[dict[str, Any]]] = [
         {"thresh": 0, "maxval": 255, "type": cv2.THRESH_TRUNC + cv2.THRESH_OTSU},
         {"thresh": 0, "maxval": 255, "type": cv2.THRESH_OTSU},
     ]
