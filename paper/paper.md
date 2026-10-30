@@ -117,7 +117,7 @@ Several architectural trade-offs guided this design. PySlyde prioritises modular
 
 PySlyde has been used in multiple ongoing computational pathology projects within the Cancer Bioinformatics Team at King's College London (London, UK), including multimodal outcome prediction studies in breast, head and neck and pan-cancer cohorts, with several manuscripts currently under review or in preparation. It is also used within the PharosAI Research Ventures Catalyst programme for large-scale histopathology data curation across collaborating institutions including Guy's and St Thomas' NHS Foundation Trust, Queen Mary University of London, Barts Health NHS Trust, and King's College London. These applications, alongside a poster at the *ESMO AI Congress, Berlin 2025*, demonstrate its immediate research utility and support expectations for wider adoption within computational pathology workflows.
 
-# AI usage disclosure
+# AI Usage Disclosure
 
 AI-assisted development tools (e.g., Cursor [@cursor]) were used to support limited refactoring and code maintenance tasks. AI-assisted changes were reviewed through standard code review and Continuous Integration/Continuous Delivery (CI/CD) validation processes on GitHub to ensure correctness and reliability. OpenAI Codex [@codex] was used to assist with generating and debugging code for the core mathematical operations of the Macenko and Vahadane stain normalisation methods. The authors reviewed, modified, and tested the generated code and take responsibility for the final implementation and results. Generative AI tools were also used to support the writing, reviewing and editing of this manuscript, with all final content verified and edited by the authors.
 
