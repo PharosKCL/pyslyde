@@ -120,7 +120,7 @@ def _skip_reason(model_name: str) -> str | None:
                 f"{model_name} is gated on Hugging Face. "
                 "Set HUGGINGFACE_TOKEN or cache the model first."
             )
-        
+
     if model_name == "pathfm":
         if not _has_tensorflow():
             return "pathfm requires tensorflow. Install tensorflow to run this test."

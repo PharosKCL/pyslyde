@@ -274,6 +274,7 @@ def test_load_weights_missing_file(tmp_path):
     with pytest.raises(FileNotFoundError, match="no file was found"):
         fg._load_weights()
 
+
 def test_load_weights_load_failure(tmp_path, monkeypatch):
     """
     Ensures that _load_weights wraps failures from torch.load with a
@@ -293,6 +294,7 @@ def test_load_weights_load_failure(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError) as e:
         fg._load_weights()
     assert "Failed to load checkpoint" in str(e.value)
+
 
 def test_load_weights_extracts_ctranspath_model_state_dict(tmp_path, monkeypatch):
     """
@@ -317,6 +319,7 @@ def test_load_weights_extracts_ctranspath_model_state_dict(tmp_path, monkeypatch
 
     assert fg._load_weights() is state_dict
 
+
 def test_load_weights_rejects_invalid_ctranspath_checkpoint(tmp_path, monkeypatch):
     """
     Ensures that _load_weights rejects a CTransPath checkpoint that does not
@@ -337,6 +340,7 @@ def test_load_weights_rejects_invalid_ctranspath_checkpoint(tmp_path, monkeypatc
     with pytest.raises(RuntimeError, match="expected a 'model' key"):
         fg._load_weights()
 
+
 @pytest.mark.parametrize("model_name", sorted(TORCHVISION_MODELS))
 def test_torchvision_models_load_local_weights(monkeypatch, model_name):
     """
@@ -346,7 +350,7 @@ def test_torchvision_models_load_local_weights(monkeypatch, model_name):
 
     Verifies that the model is constructed with ``weights=None`` and that the
     user-provided local state_dict is loaded into the model with strict matching.
-    """    
+    """
     fg = object.__new__(FeatureGenerator)
     fg.model_name = model_name
     fg.model_path = "local.pt"
@@ -374,6 +378,7 @@ def test_torchvision_models_load_local_weights(monkeypatch, model_name):
         state_dict,
         strict=True,
     )
+
 
 @pytest.mark.parametrize("model_name", sorted(TIMM_MODELS))
 def test_load_local_timm_model_loads_local_weights(monkeypatch, model_name):
@@ -414,6 +419,7 @@ def test_load_local_timm_model_loads_local_weights(monkeypatch, model_name):
         state_dict,
         strict=True,
     )
+
 
 @pytest.mark.parametrize("model_name", sorted(TRANSFORMERS_MODELS))
 def test_transformer_models_load_local_model_directory(
@@ -465,6 +471,7 @@ def test_transformer_models_load_local_model_directory(
         str(model_dir),
         local_files_only=True,
     )
+
 
 def test_pathfm_loads_local_model_directory(tmp_path, monkeypatch):
     """
