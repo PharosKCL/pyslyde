@@ -1,7 +1,7 @@
 """PySlyde: A Python package for whole slide image processing and annotation."""
 
-from pyslyde.slide import Slide, Annotations
-from pyslyde.slide_parser import WSIParser, Stitching
+from pyslyde.slide import Annotations, Slide
+from pyslyde.slide_parser import Stitching, WSIParser
 
 __version__ = "0.2.1"
 __author__ = (
@@ -12,7 +12,4 @@ __author__ = (
 )
 __email__ = "gregory.verghese@gmail.com"
 
-__all__ = ["Slide", "Annotations", "WSIParser", "Stitching"]
-
-
-
+__all__ = ["Annotations", "Slide", "Stitching", "WSIParser"]
