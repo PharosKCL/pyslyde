@@ -28,9 +28,9 @@ from PIL import Image
 
 import pyslyde.encoders.feature_extractor as fe
 from pyslyde.encoders.feature_extractor import (
-    MODEL_CONFIG,
     EXPECTED_DIMS,
     GATED_HF_MODELS,
+    MODEL_CONFIG,
     VIRCHOW_POSTPROCESS,
     FeatureGenerator,
     TFVisionWrapper,
