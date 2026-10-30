@@ -59,12 +59,16 @@ MODEL_PREPROCESS_CONFIG = {
         "std": (0.229, 0.224, 0.225),
     },
     "hoptimus0": {
-        "pipeline": ["to_tensor", "normalize"],
+        "pipeline": ["resize", "center_crop", "to_tensor", "normalize"],
+        "resize": 256,
+        "center_crop": 224,
         "mean": (0.707223, 0.578729, 0.703617),
         "std": (0.211883, 0.230117, 0.177517),
     },
     "hoptimus1": {
-        "pipeline": ["to_tensor", "normalize"],
+        "pipeline": ["resize", "center_crop", "to_tensor", "normalize"],
+        "resize": 256,
+        "center_crop": 224,
         "mean": (0.707223, 0.578729, 0.703617),
         "std": (0.211883, 0.230117, 0.177517),
     },
@@ -699,7 +703,11 @@ class FeatureGenerator:
         self._validate_model_path("file")
 
         try:
-            checkpoint = torch.load(self.model_path, map_location="cpu")
+            checkpoint = torch.load(
+                self.model_path,
+                map_location="cpu",
+                weights_only=True,
+            )
         except Exception as e:
             raise RuntimeError(
                 f"Failed to load checkpoint for model '{self.model_name}' "
@@ -1007,7 +1015,7 @@ class FeatureGenerator:
                 self.hf_hub_ref,
                 pretrained=True,
                 init_values=1e-5,
-                dynamic_img_size=False,
+                dynamic_img_size=True,
             )
         transforms = self._build_transforms("hoptimus0")
         return TorchWrapper(model, transforms, self.device)
@@ -1023,7 +1031,7 @@ class FeatureGenerator:
                 self.hf_hub_ref,
                 pretrained=True,
                 init_values=1e-5,
-                dynamic_img_size=False,
+                dynamic_img_size=True,
             )
         transforms = self._build_transforms("hoptimus1")
         return TorchWrapper(model, transforms, self.device)

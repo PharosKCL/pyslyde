@@ -380,6 +380,27 @@ def test_torchvision_models_load_local_weights(monkeypatch, model_name):
     )
 
 
+def test_resnet18_loads_real_local_state_dict(tmp_path):
+    """Verify ResNet-18 loads a real local state dict with strict key matching.
+
+    Saves the state dict of a randomly initialized ResNet-18 to a temporary
+    checkpoint, then loads it through ``FeatureGenerator``. This exercises the
+    local checkpoint loading path without downloading pretrained weights.
+    """
+    from torchvision import models
+
+    checkpoint_path = tmp_path / "resnet18.pt"
+    source_model = models.resnet18(weights=None)
+    torch.save(source_model.state_dict(), checkpoint_path)
+
+    fg = FeatureGenerator(
+        model_name="resnet18",
+        model_path=str(checkpoint_path),
+    )
+
+    assert isinstance(fg.model, TorchWrapper)
+
+
 @pytest.mark.parametrize("model_name", sorted(TIMM_MODELS))
 def test_load_local_timm_model_loads_local_weights(monkeypatch, model_name):
     """
