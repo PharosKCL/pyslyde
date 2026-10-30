@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Thu Sep 18 11:46:25 2025
 
@@ -218,7 +217,7 @@ def test_draw_boundary_output():
 ### ---------- TEST: get_x_y_from_0 ----------
 def test_get_x_y_from_0_scaling():
     class MockSlide:
-        level_dimensions = [(1000, 1000), (500, 500)]
+        level_dimensions = ((1000, 1000), (500, 500))
 
     point = (250, 250)
     level = 1
@@ -229,7 +228,7 @@ def test_get_x_y_from_0_scaling():
 ### ---------- TEST: get_size ----------
 def test_get_size_scaling():
     class MockSlide:
-        level_downsamples = [1.0, 4.0]
+        level_downsamples = (1.0, 4.0)
 
     size = (400, 400)
     new_size = utilities.get_size(MockSlide(), size, 0, 1)
@@ -257,9 +256,10 @@ def test_calculate_std_mean(mock_glob, mock_imread):
         return mapping[path].copy()
 
     # Patch glob.glob to return fake file paths, and cv2.imread to return the fake images
-    with patch(
-        "glob.glob", return_value=["patch1.png", "patch2.png", "patch3.png"]
-    ), patch("cv2.imread", side_effect=fake_imread):
+    with (
+        patch("glob.glob", return_value=["patch1.png", "patch2.png", "patch3.png"]),
+        patch("cv2.imread", side_effect=fake_imread),
+    ):
         mean, std = utilities.calculate_std_mean("dummy_path", channel=True, norm=True)
 
     # Expected values
@@ -364,9 +364,10 @@ def test_calculate_std_mean_rgb_normalized():
         return mapping[path].copy()
 
     # Patch glob.glob to return fake file paths, and cv2.imread to return the fake images
-    with patch(
-        "glob.glob", return_value=["patch1.png", "patch2.png", "patch3.png"]
-    ), patch("cv2.imread", side_effect=fake_imread):
+    with (
+        patch("glob.glob", return_value=["patch1.png", "patch2.png", "patch3.png"]),
+        patch("cv2.imread", side_effect=fake_imread),
+    ):
         mean, std = utilities.calculate_std_mean("dummy_path", channel=True, norm=True)
 
     # Expected values
@@ -403,8 +404,9 @@ def test_calculate_std_mean_grayscale_non_normalized():
         return mapping.get(path, imgs_gray[0]).copy()
 
     # Patch glob.glob to return 2 paths (simulate 2 patches)
-    with patch("glob.glob", return_value=["patch1.png", "patch2.png"]), patch(
-        "cv2.imread", side_effect=fake_imread
+    with (
+        patch("glob.glob", return_value=["patch1.png", "patch2.png"]),
+        patch("cv2.imread", side_effect=fake_imread),
     ):
         mean, std = utilities.calculate_std_mean(
             "dummy_path", channel=False, norm=False
@@ -480,9 +482,11 @@ def test_visualise_wsi_tiling(tmp_path):
     tiler = DummyTiler()
 
     # ----- Patch objects in the module where the function is defined (utilities.py) -----
-    with patch("pyslyde.util.utilities.patches.Rectangle") as mock_rect, patch(
-        "pyslyde.util.utilities.plt"
-    ) as mock_plt, patch("pyslyde.util.utilities.mpl") as mock_mpl:
+    with (
+        patch("pyslyde.util.utilities.patches.Rectangle"),
+        patch("pyslyde.util.utilities.plt") as mock_plt,
+        patch("pyslyde.util.utilities.mpl") as mock_mpl,
+    ):
         utilities.visualise_wsi_tiling(
             wsi=wsi,
             tiler=tiler,

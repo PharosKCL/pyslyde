@@ -17,14 +17,14 @@ import numpy as np
 try:
     import timm
     import torch
-    import torch.nn as nn
-    import torchvision.models as models
     from huggingface_hub import hf_hub_download, login, snapshot_download
     from huggingface_hub.utils import LocalEntryNotFoundError
     from PIL import Image
     from timm.data import resolve_data_config
     from timm.data.transforms_factory import create_transform
     from timm.layers import SwiGLUPacked, to_2tuple
+    from torch import nn
+    from torchvision import models
     from torchvision import transforms as T
     from transformers import AutoImageProcessor, AutoModel
 except ImportError as e:
@@ -430,6 +430,69 @@ class TFVisionWrapper:
             raise RuntimeError(f"Unexpected TF model outputs: {list(out.keys())}.")
 
         return torch.from_numpy(emb)
+
+
+class ConvStem(nn.Module):
+    """
+    Patch embedding implementation used as a replacement for the
+    default embedding layer in Swin Transformer models.
+
+    This implementation matches the convolutional stem expected by
+    CTransPath (transpath) pretrained pathology model distributed via HF.
+    """
+
+    def __init__(
+        self,
+        img_size=224,
+        patch_size=4,
+        in_chans=3,
+        embed_dim=768,
+        norm_layer=None,
+        **kwargs,
+    ):
+        super().__init__()
+
+        assert patch_size == 4
+        assert embed_dim % 8 == 0
+
+        img_size = to_2tuple(img_size)
+        patch_size = to_2tuple(patch_size)
+        self.img_size = img_size
+        self.patch_size = patch_size
+        self.grid_size = (img_size[0] // patch_size[0], img_size[1] // patch_size[1])
+        self.num_patches = self.grid_size[0] * self.grid_size[1]
+
+        stem = []
+        input_dim, output_dim = 3, embed_dim // 8
+        for layer in range(2):
+            stem.append(
+                nn.Conv2d(
+                    input_dim,
+                    output_dim,
+                    kernel_size=3,
+                    stride=2,
+                    padding=1,
+                    bias=False,
+                )
+            )
+            stem.append(nn.BatchNorm2d(output_dim))
+            stem.append(nn.ReLU(inplace=True))
+            input_dim = output_dim
+            output_dim *= 2
+        stem.append(nn.Conv2d(input_dim, embed_dim, kernel_size=1))
+        self.proj = nn.Sequential(*stem)
+
+        self.norm = norm_layer(embed_dim) if norm_layer else nn.Identity()
+
+    def forward(self, x):
+        _B, _C, H, W = x.shape
+        assert H == self.img_size[0] and W == self.img_size[1], (
+            f"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]})."
+        )
+        x = self.proj(x)
+        x = x.permute(0, 2, 3, 1)  # BCHW -> BHWC
+        x = self.norm(x)
+        return x
 
 
 class FeatureGenerator:
@@ -1106,7 +1169,7 @@ class FeatureGenerator:
             if out.ndim != 3:
                 raise RuntimeError(f"{name} expected (B,T,C), got {out.shape}.")
 
-            B, T, C = out.shape
+            _B, T, C = out.shape
             exp_T, exp_C = cfg["expected_T"], cfg["expected_C"]
             if (exp_T is not None and T != exp_T) or (exp_C is not None and C != exp_C):
                 raise RuntimeError(
