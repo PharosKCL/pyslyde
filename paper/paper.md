@@ -21,9 +21,9 @@ authors:
     equal-contrib: true
     affiliation: "1, 3"
   - name: Enrico Parisini
-    affiliation: "1, 3"
+    affiliation: "1, 4"
   - name: Mengyuan Li
-    affiliation: "1, 3"
+    affiliation: "1, 4"
   - name: Fathima Mohamed
     affiliation: 1
   - name: Ananya Bhalla
@@ -31,11 +31,11 @@ authors:
   - name: Lucy Ryan
     affiliation: 1
   - name: Michael Pitcher
-    affiliation: "1, 3"
+    affiliation: "1, 4"
   - name: Concetta Piazzese
-    affiliation: "3, 6"
+    affiliation: "4, 6"
   - name: Fan Zhang
-    affiliation: "3, 7"
+    affiliation: "4, 7"
   - name: James Graham
     affiliation: "3, 4"
   - name: Dinis Pedro Calado
@@ -44,24 +44,24 @@ authors:
     affiliation: "1, 2"
   - name: Anita Grigoriadis
     corresponding: true
-    affiliation: "1, 3"
+    affiliation: "1, 4"
   - name: Gregory Verghese
     corresponding: true
-    affiliation: "1, 3"
+    affiliation: "1, 4"
 affiliations:
-  - name: Cancer Bioinformatics, School of Cancer and Pharmaceutical Sciences, Faculty of Life Sciences and Medicine, King's College London, London, UK
+  - name: School of Cancer and Pharmaceutical Sciences, Faculty of Life Sciences and Medicine, King's College London, London, UK
     index: 1
   - name: The Alan Turing Institute, The British Library, London, UK
     index: 2
-  - name: PharosAI, London, UK
-    index: 3
   - name: eResearch, King's College London, London, UK
+    index: 3
+  - name: PharosAI, London, UK
     index: 4
   - name: The Francis Crick Institute, London, UK
     index: 5
   - name: Barts Life Sciences, Barts Health NHS Trust, London, UK
     index: 6
-  - name: University of Cambridge, Cambridge, UK
+  - name: Department of Applied Mathematics and Theoretical Physics, University of Cambridge, Cambridge, UK
     index: 7
 date: 27 October 2026
 bibliography: paper.bib
