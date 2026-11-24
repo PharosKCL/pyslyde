@@ -9,43 +9,60 @@ tags:
   - foundation models
 authors:
   - name: Chima Eke
+    orcid: 0000-0002-3095-357X
     equal-contrib: true
     affiliation: 1
   - name: Anthony Baptista
+    orcid: 0000-0002-8514-0250
     equal-contrib: true
     affiliation: "1, 2"
   - name: Holly Rafique
+    orcid: 0000-0003-3828-4371
     equal-contrib: true
     affiliation: 1
   - name: Elizabeth Ing-Simmons
+    orcid: 0000-0002-0394-2429
     equal-contrib: true
     affiliation: "1, 3"
   - name: Enrico Parisini
+    orcid: 0000-0001-9908-6315
     affiliation: "1, 4"
   - name: Mengyuan Li
+    orcid: 0000-0001-5526-3228
     affiliation: "1, 4"
   - name: Fathima Mohamed
+    orcid: 0009-0008-8434-2943
     affiliation: 1
   - name: Ananya Bhalla
     affiliation: "1, 5"
   - name: Lucy Ryan
+    orcid: 0009-0000-5392-159X
     affiliation: 1
   - name: Michael Pitcher
+    orcid: 0000-0002-1935-2968
     affiliation: "1, 4"
   - name: Concetta Piazzese
+    orcid: 0000-0002-3605-1809
     affiliation: "4, 6"
   - name: Fan Zhang
+    orcid: 0000-0003-2520-7166
     affiliation: "4, 7"
   - name: James Graham
+    orcid: 0000-0001-5217-3104
     affiliation: "3, 4"
   - name: Dinis Pedro Calado
+    orcid: 0000-0001-8239-7184
     affiliation: 5
   - name: Christopher R.S. Banerji
+    orcid: 0000-0002-4373-7657
     affiliation: "1, 2"
   - name: Anita Grigoriadis
+    orcid: 0000-0003-3434-201X
     corresponding: true
     affiliation: "1, 4"
   - name: Gregory Verghese
+    orcid: 0009-0006-7638-6431
+    equal-contrib: true
     corresponding: true
     affiliation: "1, 4"
 affiliations:
