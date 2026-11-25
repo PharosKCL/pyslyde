@@ -1,0 +1,40 @@
+"""Create stain normalisers by name (``"macenko"``, ``"reinhard"``, ``"vahadane"``)."""
+
+# stain_normalization/factory.py
+
+from .base import StainNormalizer
+from .macenko import MacenkoStainNormalizer
+from .reinhard import ReinhardStainNormalizer
+from .vahadane import VahadaneStainNormalizer
+
+# Registry of available normalizers
+_REGISTRY: dict[str, type[StainNormalizer]] = {
+    "macenko": MacenkoStainNormalizer,
+    "vahadane": VahadaneStainNormalizer,
+    "reinhard": ReinhardStainNormalizer,
+}
+
+
+def make_normalizer(method: str, **kwargs) -> StainNormalizer:
+    """
+    Factory for creating a stain normalizer.
+
+    Parameters
+    ----------
+    method : str
+        Name of the normalization method ('macenko', 'vahadane', 'reinhard').
+    **kwargs :
+        Arguments forwarded to the class constructor.
+
+    Returns
+    -------
+    StainNormalizer
+        Instance of the requested normalizer.
+    """
+    try:
+        cls = _REGISTRY[method.lower()]
+    except KeyError:
+        raise ValueError(
+            f"Unknown method '{method}'. Available: {list(_REGISTRY.keys())}"
+        )
+    return cls(**kwargs)

@@ -1,0 +1,122 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "PySlyde"
+version = "1.0.0"
+dependencies = [
+    "lmdb",
+    "matplotlib",
+    "numpy",
+    "opencv-python",
+    "openslide-python",
+    "pandas",
+    "pillow",
+    "rasterio",
+    "seaborn",
+    "scikit-image>=0.25",
+    "scikit-learn",
+]
+requires-python = ">= 3.10"
+authors = [
+    {name = "Chima Eke"},
+    {name = "Anthony Baptista"},
+    {name = "Holly Rafique"},
+    {name = "Elizabeth Ing-Simmons"},
+    {name = "Enrico Parisini"},
+    {name = "Mengyuan Li"},
+    {name = "Fathima Mohamed"},
+    {name = "Ananya Bhalla"},
+    {name = "Lucy Ryan"},
+    {name = "Michael Pitcher"},
+    {name = "Concetta Piazzese"},
+    {name = "James Graham"},
+    {name = "Dinis Pedro Calado"},
+    {name = "Christopher R.S. Banerji"},
+    {name = "Anita Grigoriadis"},
+    {name = "Gregory Verghese", email = "gregory.verghese@gmail.com"}
+    ]
+description = "A Python package for preprocessing pathology whole slide images."
+readme = "README.md"
+keywords = ["pathology", "whole slide image", "medical imaging", "computer vision"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Scientific/Engineering :: Medical Science Apps."
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "scikit-learn"
+]
+dev = [
+    "ruff",
+    "mypy",
+    "pre-commit",
+    "nbmake",
+]
+docs = [
+    "sphinx>=7.2",
+    "sphinx-rtd-theme>=2.0",
+    "myst-nb>=1.0",
+]
+rocksdb =  ["rocksdict>=0.3.24"]
+feature-extractor = [
+    "torch",
+    "pillow",
+    "timm",
+    "torchvision",
+    "huggingface_hub",
+    "transformers"
+]
+tensorflow = [
+    "tensorflow",
+    "tf-keras"
+]
+geospatial = [
+    "geopandas",
+    "rasterio",
+    "shapely"
+]
+all = ["pyslyde[rocksdb,feature-extractor,tensorflow,geospatial]"]
+
+[project.urls]
+Source = "https://github.com/PharosKCL/pyslyde"
+Documentation = "https://pyslyde.readthedocs.io/en/latest/"
+"Bug Reports" = "https://github.com/PharosKCL/pyslyde/issues"
+
+[tool.setuptools.packages.find]
+include = ["pyslyde*"]
+
+# Example annotations used by pyslyde.datasets (docs, tutorials, integration tests).
+[tool.setuptools.package-data]
+"pyslyde.datasets" = ["annotations/*"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra --strict-markers"
+testpaths = ["test"]
+markers = [
+  "disk: tests for disk-backed IO",
+  "lmdb: tests that require LMDB for pyslyde.io.lmdb_io",
+  "rocksdb: tests that require RocksDB for pyslyde.io.rocksdb_io",
+  "tfrecords: tests for TFRecords IO",
+  "tfrecord_write: tests for tfrecord_write helpers",
+  "integration: end-to-end tests on the example dataset (real WSI + annotations in all formats); must run with 0 skips",
+  "models: tests that load real feature-extractor weights and run real forward passes (opt-in, RUN_NETWORK_TESTS=1)",
+  "gated: real-model tests for gated Hugging Face models (need HUGGINGFACE_TOKEN or a local cache)",
+  "bigmem: real-model tests for very large models (need >= 24 GB RAM/VRAM by default)",
+  "network: tests that may access the internet (downloads, HF hub, etc.)",
+  "pca: tests for PCA utility functions",
+  "slide_parser: tests for pyslyde.slide_parser",
+]
