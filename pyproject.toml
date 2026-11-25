@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PySlyde"
-version = "0.2.1"
+version = "1.0.0"
 dependencies = [
     "lmdb",
     "matplotlib",
@@ -41,7 +41,7 @@ description = "A Python package for preprocessing pathology whole slide images."
 readme = "README.md"
 keywords = ["pathology", "whole slide image", "medical imaging", "computer vision"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
